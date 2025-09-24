@@ -1,0 +1,10 @@
+name: RpgTools
+version: '1.0-SNAPSHOT'
+main: com.sarkus.rpgTools.RpgTools
+api-version: '1.21'
+
+commands:
+  market:
+    description: "Opens Market"
+    usage: /market
+

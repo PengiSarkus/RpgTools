@@ -4,6 +4,7 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataAdapterContext;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 
@@ -51,6 +52,13 @@ public class RpgToolManager {
         container.set(xpKey, PersistentDataType.INTEGER, xp);
         container.set(levelKey, PersistentDataType.INTEGER, level);
 
+        userItem.setItemMeta(meta);
+        updateLore(userItem);
+    }
+    public void setLevel(ItemStack userItem, int level, Player player) {
+        ItemMeta meta = userItem.getItemMeta();
+        PersistentDataContainer container = meta.getPersistentDataContainer();
+        container.set(levelKey, PersistentDataType.INTEGER, level);
         userItem.setItemMeta(meta);
         updateLore(userItem);
     }
