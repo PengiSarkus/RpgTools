@@ -124,14 +124,28 @@ public class GuiCommand implements CommandExecutor {
     }
     private void putEnchants(HashMap<String,Integer> enchants, Inventory inventory,ItemStack displayItem,int itemIndex,int itemSpace){
         ItemMeta displayItemItemMeta = (EnchantmentStorageMeta) displayItem.getItemMeta();
+        
+        // Loop through all the enchantments mapped for this specific tool/weapon
         for (String enchant : enchants.keySet()){
+            
+            // Set the name of the display book to the enchantment name (e.g. "Sharpness")
             displayItemItemMeta.setDisplayName(enchant);
+            
+            // Convert the standard name to Bukkit's naming convention
             String bukkitName = enchant.toUpperCase().replace(" ", "_");
             Enchantment enchantment = Enchantment.getByName(bukkitName);
+            
+            // Add the enchantment to the meta, ignoring level restrictions (true)
             displayItemItemMeta.addEnchant(enchantment,enchants.get(enchant),true);
             displayItem.setItemMeta(displayItemItemMeta);
+            
+            // Place the item into the inventory at the calculated slot
             inventory.setItem(itemIndex,displayItem);
+            
+            // Move to the next slot for the next enchantment item
             itemIndex = itemIndex + itemSpace;
+            
+            // Remove the enchantment so the next book doesn't have the previous book's enchant
             displayItemItemMeta.removeEnchant(enchantment);
         }
 
@@ -164,6 +178,7 @@ public class GuiCommand implements CommandExecutor {
         mainInventory.setItem(15,barrier);
         player.openInventory(mainInventory);
         player.setMetadata("openedMenu", new FixedMetadataValue(RpgTools.getPlugin(), "mainInventory"));
+        player.setMetadata("marketValue", new FixedMetadataValue(RpgTools.getPlugin(),"mainInventory"));
 
         //Level Market Inventory
         ItemStack levelMarketTools = new ItemStack(Material.DIAMOND_PICKAXE);

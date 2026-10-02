@@ -1,6 +1,7 @@
 package com.sarkus.rpgTools.Gui;
 
 import com.sarkus.rpgTools.RpgTools;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -15,12 +16,20 @@ public class GuiListener implements Listener {
     }
    @EventHandler
    public void onInventoryClick(InventoryClickEvent e) {
+       // Only process clicks made by a player
        if (!(e.getWhoClicked() instanceof Player)) {return;}
        Player p = (Player) e.getWhoClicked();
-       if(p.hasMetadata("openedMenu")) {
+       
+       // Check if the player is currently viewing our custom GUI (using metadata tags)
+       if(p.hasMetadata("openedMenu") || p.hasMetadata("marketValue")) {
+           // Cancel the event so they can't take items out of the custom GUI
            e.setCancelled(true);
-           String menu = p.getMetadata("openedMenu").get(0).asString();
+           
+           // Determine which specific menu page they are currently on
+           String menu = p.getMetadata("marketValue").get(0).asString();
            int slot = e.getSlot();
+           
+           // Route the click to the correct handler based on the active menu
            switch (menu) {
                case "mainInventory":
                    handleMainInventory(p, slot);
@@ -32,6 +41,8 @@ public class GuiListener implements Listener {
                    e.setCancelled(true);
                    break;
 
+               // Note: Other GUI menus below currently don't have functional handlers.
+               // They just cancel the click to protect the GUI items.
                case "levelMarketTools":
               //     handleLevelMarketTools(p, slot);
                    e.setCancelled(true);
@@ -89,22 +100,39 @@ public class GuiListener implements Listener {
    @EventHandler
    public void onInventoryClose(InventoryCloseEvent e) {
        Player player = (Player) e.getPlayer();
+       // When the player closes the GUI, make sure to clean up the metadata
+       // so they can use their inventory normally again.
        if(player.hasMetadata("openedMenu")) player.removeMetadata("openedMenu", RpgTools.getPlugin());
+       if(player.hasMetadata("marketValue")) player.removeMetadata("marketValue", RpgTools.getPlugin());
    }
     public void handleMainInventory(Player player, int slot){
         switch(slot) {
             case 11:
-                player.removeMetadata("openedMenu", RpgTools.getPlugin());
-                player.setMetadata("openedMenu",new FixedMetadataValue(RpgTools.getPlugin(),"levelMarketInventory"));
+                // They clicked the "Level Market" button. Open the next menu.
                 player.openInventory(gui.getLevelMarketInventory());
+                // Update their current menu state to the new menu
+                player.setMetadata("marketValue", new FixedMetadataValue(RpgTools.getPlugin(),"levelMarketInventory"));
+                break;
+            case 15:
+                // They clicked the "Close Barrier" button. Clean up state and close the UI.
+                player.removeMetadata("marketValue", RpgTools.getPlugin());
+                player.removeMetadata("openedMenu", RpgTools.getPlugin());
+                player.closeInventory();
         }
     }
     public void handleLevelMarket(Player player, int slot){
         switch(slot) {
             case 11:
-                player.removeMetadata("openedMenu", RpgTools.getPlugin());
-                player.setMetadata("openedMenu", new FixedMetadataValue(RpgTools.getPlugin(),"miningToolInventory"));
-                player.openInventory(gui.getMiningToolInventory());
+                    // They clicked the "Tool Level Market" option.
+                    player.openInventory(gui.getMiningToolInventory());
+                    player.setMetadata("marketValue", new FixedMetadataValue(RpgTools.getPlugin(), "miningToolInventory"));
+                    player.setMetadata("openedMenu" , new FixedMetadataValue(RpgTools.getPlugin(),"levelMarketInventory"));
+                    break;
+            case 15:
+                // They clicked the "Melee Weapon Level Market" option.
+                player.openInventory(gui.getMeleeInventory());
+                player.setMetadata("marketValue", new FixedMetadataValue(RpgTools.getPlugin(), "meleeInventory"));
+                player.setMetadata("openedMenu" , new FixedMetadataValue(RpgTools.getPlugin(),"meleeInventory"));
         }
     }
 }

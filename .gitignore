@@ -1,0 +1,10 @@
+# idea files
+.idea/
+
+# Gradle files
+.gradle/
+
+/build
+#personal files
+.personal/.DS_Store
+**/.DS_Store
